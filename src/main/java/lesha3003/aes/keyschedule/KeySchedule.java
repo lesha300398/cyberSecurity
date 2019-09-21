@@ -4,6 +4,7 @@ import lesha3003.aes.Aes;
 import lesha3003.aes.Sbox;
 
 public final class KeySchedule {
+    private KeySchedule(){}
     public static byte[][][] getSubKeys(byte[] key, Aes.KeySize keySize) {
         if (key.length != keySize.getKeyLengthBits() / 8 ) {
             throw new IllegalArgumentException("Key has incorrect length");

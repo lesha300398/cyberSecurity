@@ -3,6 +3,7 @@ package lesha3003.aes.roundsteps;
 import lesha3003.aes.Aes;
 
 public final class AddRoundKey {
+    private AddRoundKey(){}
     public static byte[][] addRoundKey(byte[][] state, byte[][] subKey) {
         byte[][] result = new byte[Aes.ROW_COUNT][Aes.COLUMN_COUNT];
         for(int i = 0; i< Aes.ROW_COUNT; i++) {

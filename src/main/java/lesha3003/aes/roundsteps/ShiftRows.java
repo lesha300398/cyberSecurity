@@ -3,6 +3,7 @@ package lesha3003.aes.roundsteps;
 import lesha3003.aes.Aes;
 
 public final class ShiftRows {
+    private ShiftRows(){}
     public static byte[][] shiftRows(byte[][] state) {
         byte[][] result = new byte[Aes.ROW_COUNT][Aes.COLUMN_COUNT];
         for(int i = 0; i< Aes.ROW_COUNT; i++) {

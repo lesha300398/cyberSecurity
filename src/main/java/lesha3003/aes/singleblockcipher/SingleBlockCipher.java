@@ -23,9 +23,9 @@ public final class SingleBlockCipher {
                 rounds = 0;
                 break;
         }
-        if (subKeys.length != rounds + 1) {
-            throw new IllegalArgumentException("Subkey count does not correspond to AES keySize");
-        }
+//        if (subKeys.length != rounds + 1) {
+//            throw new IllegalArgumentException("Subkey count does not correspond to AES keySize");
+//        }
         byte[][] state = plain;
         state = AddRoundKey.addRoundKey(state, subKeys[0]);
         for (int i = 1; i < rounds; i++) {
@@ -56,9 +56,9 @@ public final class SingleBlockCipher {
                 rounds = 0;
                 break;
         }
-        if (subKeys.length != rounds + 1) {
-            throw new IllegalArgumentException("Subkey count does not correspond to AES keySize");
-        }
+//        if (subKeys.length != rounds + 1) {
+//                throw new IllegalArgumentException("Subkey count does not correspond to AES keySize");
+//        }
         byte[][] state = cipher;
         state = AddRoundKey.addRoundKey(state, subKeys[rounds]);
         state = ShiftRows.invShiftRows(state);

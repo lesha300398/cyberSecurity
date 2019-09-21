@@ -4,6 +4,7 @@ import lesha3003.aes.Aes;
 import lesha3003.aes.Utils;
 
 public final class MixColumns {
+    private MixColumns(){}
     public static byte[][] mixColumns(byte[][] state) {
         byte[][] result = new byte[Aes.ROW_COUNT][Aes.COLUMN_COUNT];
         for(int i = 0; i< Aes.ROW_COUNT; i++) {

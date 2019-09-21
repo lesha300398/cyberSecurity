@@ -4,7 +4,7 @@ import lesha3003.aes.Aes;
 import lesha3003.aes.Sbox;
 
 public final class SubBytes {
-
+    private SubBytes(){}
     public static byte[][] subBytes(byte[][] state) {
         byte[][] result = new byte[Aes.ROW_COUNT][Aes.COLUMN_COUNT];
         for(int i = 0; i< Aes.ROW_COUNT; i++) {

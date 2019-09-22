@@ -3,6 +3,7 @@ package roundsteps;
 import org.junit.Assert;
 import org.junit.Test;
 
+import lesha3003.aes.Utils;
 import lesha3003.aes.roundsteps.MixColumns;
 import lesha3003.aes.roundsteps.ShiftRows;
 
@@ -22,9 +23,10 @@ public class ShiftRowsTest {
                 {(byte) 0x33, (byte) 0x30, (byte) 0x31, (byte) 0x32}
         };
 
-        byte[][] result = ShiftRows.shiftRows(state);
+        byte[] stateBytes = Utils.matrixToBytes(state);
+        ShiftRows.shiftRows(stateBytes);
 
-        Assert.assertArrayEquals(expectedResult,result);
+        Assert.assertArrayEquals(expectedResult, Utils.bytesToMatrix(stateBytes));
     }
     @Test
     public void invShiftRows_test() {
@@ -41,8 +43,9 @@ public class ShiftRowsTest {
                 {(byte) 0x30, (byte) 0x31, (byte) 0x32, (byte) 0x33}
         };
 
-        byte[][] result = ShiftRows.invShiftRows(state);
+        byte[] stateBytes = Utils.matrixToBytes(state);
+        ShiftRows.invShiftRows(stateBytes);
 
-        Assert.assertArrayEquals(expectedResult,result);
+        Assert.assertArrayEquals(expectedResult, Utils.bytesToMatrix(stateBytes));
     }
 }

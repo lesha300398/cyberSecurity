@@ -4,13 +4,11 @@ import lesha3003.aes.Aes;
 
 public final class AddRoundKey {
     private AddRoundKey(){}
-    public static byte[][] addRoundKey(byte[][] state, byte[][] subKey) {
-        byte[][] result = new byte[Aes.ROW_COUNT][Aes.COLUMN_COUNT];
-        for(int i = 0; i< Aes.ROW_COUNT; i++) {
-            for(int j = 0; j<Aes.COLUMN_COUNT; j++) {
-                result[i][j] = (byte)(state[i][j] ^ subKey[i][j]);
-            }
+    public static void addRoundKey(byte[] state, byte[] subKey) {
+        for(int i = 0; i< state.length; i++) {
+
+                state[i] = (byte)(state[i] ^ subKey[i]);
+
         }
-        return result;
     }
 }

@@ -3,25 +3,26 @@ package lesha3003.aes.roundsteps;
 import lesha3003.aes.Aes;
 
 public final class ShiftRows {
-    private ShiftRows(){}
-    public static byte[][] shiftRows(byte[][] state) {
-        byte[][] result = new byte[Aes.ROW_COUNT][Aes.COLUMN_COUNT];
-        for(int i = 0; i< Aes.ROW_COUNT; i++) {
-            for(int j = 0; j<Aes.COLUMN_COUNT; j++) {
-
-                result[i][j] = state[i][(i+j)%Aes.ROW_COUNT];
-            }
-        }
-        return result;
+    private ShiftRows() {
     }
-    public static byte[][] invShiftRows(byte[][] state) {
-        byte[][] result = new byte[Aes.ROW_COUNT][Aes.COLUMN_COUNT];
-        for(int i = 0; i< Aes.ROW_COUNT; i++) {
-            for(int j = 0; j<Aes.COLUMN_COUNT; j++) {
 
-                result[i][(i+j)%Aes.ROW_COUNT] = state[i][j];
-            }
+    public static void shiftRows(byte[] state) {
+        byte[] result = new byte[16];
+        for (int i = 0; i < 16; i++) {
+            result[i] = state[(i % 4 + i / 4) % 4 * 4 + i % 4];
         }
-        return result;
+        for (int i = 0; i < 16; i++) {
+            state[i] = result[i];
+        }
+    }
+
+    public static void invShiftRows(byte[] state) {
+        byte[] result = new byte[16];
+        for (int i = 0; i < 16; i++) {
+            result[(i % 4 + i / 4) % 4 * 4 + i % 4] = state[i];
+        }
+        for (int i = 0; i < 16; i++) {
+            state[i] = result[i];
+        }
     }
 }

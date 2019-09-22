@@ -15,17 +15,15 @@ public class SingleBlockCipherTest {
     public void integrity_aes128_test() {
         Random random = new Random();
 
-        final byte[][] plain = new byte[4][4];
+        final byte[] plain = new byte[16];
         final byte[] key = new byte[16];
-        for (int i = 0; i < 4; i++) {
-            random.nextBytes(plain[i]);
-            random.nextBytes(key);
-        }
+        random.nextBytes(plain);
+        random.nextBytes(key);
 
-        byte[][][] subKeys = KeySchedule.getSubKeys(key, Aes.KeySize.AES_128);
+        byte[][] subKeys = KeySchedule.getSubKeys(key, Aes.KeySize.AES_128);
 
-        byte[][] cipher = SingleBlockCipher.encrypt(Aes.KeySize.AES_128, plain, subKeys);
-        byte[][] decipher = SingleBlockCipher.decrypt(Aes.KeySize.AES_128, cipher, subKeys);
+        byte[] cipher = SingleBlockCipher.encrypt(Aes.KeySize.AES_128, plain, subKeys);
+        byte[] decipher = SingleBlockCipher.decrypt(Aes.KeySize.AES_128, cipher, subKeys);
 
         Assert.assertArrayEquals(plain, decipher);
 
@@ -34,17 +32,16 @@ public class SingleBlockCipherTest {
     public void integrity_aes192_test() {
         Random random = new Random();
 
-        final byte[][] plain = new byte[4][4];
+        final byte[] plain = new byte[16];
         final byte[] key = new byte[24];
-        for (int i = 0; i < 4; i++) {
-            random.nextBytes(plain[i]);
-            random.nextBytes(key);
-        }
+        random.nextBytes(plain);
+        random.nextBytes(key);
 
-        byte[][][] subKeys = KeySchedule.getSubKeys(key, Aes.KeySize.AES_192);
 
-        byte[][] cipher = SingleBlockCipher.encrypt(Aes.KeySize.AES_192, plain, subKeys);
-        byte[][] decipher = SingleBlockCipher.decrypt(Aes.KeySize.AES_192, cipher, subKeys);
+        byte[][] subKeys = KeySchedule.getSubKeys(key, Aes.KeySize.AES_192);
+
+        byte[] cipher = SingleBlockCipher.encrypt(Aes.KeySize.AES_192, plain, subKeys);
+        byte[] decipher = SingleBlockCipher.decrypt(Aes.KeySize.AES_192, cipher, subKeys);
 
         Assert.assertArrayEquals(plain, decipher);
 
@@ -53,17 +50,15 @@ public class SingleBlockCipherTest {
     public void integrity_aes256_test() {
         Random random = new Random();
 
-        final byte[][] plain = new byte[4][4];
+        final byte[] plain = new byte[16];
         final byte[] key = new byte[32];
-        for (int i = 0; i < 4; i++) {
-            random.nextBytes(plain[i]);
-            random.nextBytes(key);
-        }
+        random.nextBytes(plain);
+        random.nextBytes(key);
 
-        byte[][][] subKeys = KeySchedule.getSubKeys(key, Aes.KeySize.AES_256);
+        byte[][] subKeys = KeySchedule.getSubKeys(key, Aes.KeySize.AES_256);
 
-        byte[][] cipher = SingleBlockCipher.encrypt(Aes.KeySize.AES_256, plain, subKeys);
-        byte[][] decipher = SingleBlockCipher.decrypt(Aes.KeySize.AES_256, cipher, subKeys);
+        byte[] cipher = SingleBlockCipher.encrypt(Aes.KeySize.AES_256, plain, subKeys);
+        byte[] decipher = SingleBlockCipher.decrypt(Aes.KeySize.AES_256, cipher, subKeys);
 
         Assert.assertArrayEquals(plain, decipher);
 
@@ -197,21 +192,21 @@ public class SingleBlockCipherTest {
     }
     private void testEncrypt(Aes.KeySize keySize, String plainHexString, String keyHexString, String expectedCipherHexString) {
         byte[] key = Utils.hexStringToByteArray(keyHexString);
-        byte[][] plain = Utils.bytesToMatrix(Utils.hexStringToByteArray(plainHexString));
-        byte[][] expectedCipher = Utils.bytesToMatrix(Utils.hexStringToByteArray(expectedCipherHexString));
+        byte[] plain = Utils.hexStringToByteArray(plainHexString);
+        byte[] expectedCipher = Utils.hexStringToByteArray(expectedCipherHexString);
 
-        byte[][][] subKeys = KeySchedule.getSubKeys(key, keySize);
-        byte[][] cipher = SingleBlockCipher.encrypt(keySize, plain, subKeys);
+        byte[][] subKeys = KeySchedule.getSubKeys(key, keySize);
+        byte[] cipher = SingleBlockCipher.encrypt(keySize, plain, subKeys);
 
         Assert.assertArrayEquals(expectedCipher, cipher);
     }
     private void testDecrypt(Aes.KeySize keySize, String cipherHexString, String keyHexString, String expectedPlainHexString) {
         byte[] key = Utils.hexStringToByteArray(keyHexString);
-        byte[][] cipher = Utils.bytesToMatrix(Utils.hexStringToByteArray(cipherHexString));
-        byte[][] expectedPlain = Utils.bytesToMatrix(Utils.hexStringToByteArray(expectedPlainHexString));
+        byte[] cipher = Utils.hexStringToByteArray(cipherHexString);
+        byte[] expectedPlain = Utils.hexStringToByteArray(expectedPlainHexString);
 
-        byte[][][] subKeys = KeySchedule.getSubKeys(key, keySize);
-        byte[][] plain = SingleBlockCipher.decrypt(keySize, cipher, subKeys);
+        byte[][] subKeys = KeySchedule.getSubKeys(key, keySize);
+        byte[] plain = SingleBlockCipher.decrypt(keySize, cipher, subKeys);
 
         Assert.assertArrayEquals(expectedPlain, plain);
     }

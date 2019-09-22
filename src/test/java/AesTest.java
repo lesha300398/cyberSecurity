@@ -1,5 +1,3 @@
-package modes;
-
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -12,9 +10,10 @@ import java.util.Random;
 import lesha3003.aes.Aes;
 import lesha3003.aes.modes.Ctr;
 
-public class CtrTest {
+public class AesTest {
     @Test
-    public void integrity_aes128_test() throws IOException {
+    public void integrity_bytes_aes128_ctr_test() throws IOException {
+        Aes aes = new Aes(Aes.KeySize.AES_128, Aes.Mode.CTR);
         byte[] key = new byte[16];
         byte[] plain = new byte[1024*1024];
 
@@ -22,20 +21,22 @@ public class CtrTest {
         random.nextBytes(key);
         random.nextBytes(plain);
 
-        ByteArrayOutputStream cipherOutputStream = new ByteArrayOutputStream(1024*1024 + 8);
-        ByteArrayOutputStream plainOutputStream = new ByteArrayOutputStream(1024*1024);
         Date start = new Date();
-        Ctr.encrypt(new ByteArrayInputStream(plain),key, Aes.KeySize.AES_128, cipherOutputStream);
+        byte[] cipher = aes.encrypt(key,plain);
+
         Date encrypted = new Date();
         System.out.printf("encrypted in %d milliseconds\n", encrypted.getTime() - start.getTime());
-        Ctr.decrypt(new ByteArrayInputStream(cipherOutputStream.toByteArray()), key, Aes.KeySize.AES_128, plainOutputStream);
+
+        byte[] decryptedPlain = aes.decrypt(key, cipher);
+
         Date decrypted = new Date();
         System.out.printf("decrypted in %d milliseconds\n", decrypted.getTime() - encrypted.getTime());
 
-        Assert.assertArrayEquals(plain, plainOutputStream.toByteArray());
+        Assert.assertArrayEquals(plain, decryptedPlain);
     }
     @Test
-    public void integrity_aes192_test() throws IOException {
+    public void integrity_bytes_aes192_ctr_test() throws IOException {
+        Aes aes = new Aes(Aes.KeySize.AES_192, Aes.Mode.CTR);
         byte[] key = new byte[24];
         byte[] plain = new byte[1024*1024];
 
@@ -43,20 +44,22 @@ public class CtrTest {
         random.nextBytes(key);
         random.nextBytes(plain);
 
-        ByteArrayOutputStream cipherOutputStream = new ByteArrayOutputStream(1024*1024 + 8);
-        ByteArrayOutputStream plainOutputStream = new ByteArrayOutputStream(1024*1024);
         Date start = new Date();
-        Ctr.encrypt(new ByteArrayInputStream(plain),key, Aes.KeySize.AES_192, cipherOutputStream);
+        byte[] cipher = aes.encrypt(key,plain);
+
         Date encrypted = new Date();
         System.out.printf("encrypted in %d milliseconds\n", encrypted.getTime() - start.getTime());
-        Ctr.decrypt(new ByteArrayInputStream(cipherOutputStream.toByteArray()), key, Aes.KeySize.AES_192, plainOutputStream);
+
+        byte[] decryptedPlain = aes.decrypt(key, cipher);
+
         Date decrypted = new Date();
         System.out.printf("decrypted in %d milliseconds\n", decrypted.getTime() - encrypted.getTime());
 
-        Assert.assertArrayEquals(plain, plainOutputStream.toByteArray());
+        Assert.assertArrayEquals(plain, decryptedPlain);
     }
     @Test
-    public void integrity_aes256_test() throws IOException {
+    public void integrity_bytes_aes256_ctr_test() throws IOException {
+        Aes aes = new Aes(Aes.KeySize.AES_256, Aes.Mode.CTR);
         byte[] key = new byte[32];
         byte[] plain = new byte[1024*1024];
 
@@ -64,16 +67,17 @@ public class CtrTest {
         random.nextBytes(key);
         random.nextBytes(plain);
 
-        ByteArrayOutputStream cipherOutputStream = new ByteArrayOutputStream(1024*1024 + 8);
-        ByteArrayOutputStream plainOutputStream = new ByteArrayOutputStream(1024*1024);
         Date start = new Date();
-        Ctr.encrypt(new ByteArrayInputStream(plain),key, Aes.KeySize.AES_256, cipherOutputStream);
+        byte[] cipher = aes.encrypt(key,plain);
+
         Date encrypted = new Date();
         System.out.printf("encrypted in %d milliseconds\n", encrypted.getTime() - start.getTime());
-        Ctr.decrypt(new ByteArrayInputStream(cipherOutputStream.toByteArray()), key, Aes.KeySize.AES_256, plainOutputStream);
+
+        byte[] decryptedPlain = aes.decrypt(key, cipher);
+
         Date decrypted = new Date();
         System.out.printf("decrypted in %d milliseconds\n", decrypted.getTime() - encrypted.getTime());
 
-        Assert.assertArrayEquals(plain, plainOutputStream.toByteArray());
+        Assert.assertArrayEquals(plain, decryptedPlain);
     }
 }

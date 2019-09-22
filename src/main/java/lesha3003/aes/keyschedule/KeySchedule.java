@@ -5,7 +5,7 @@ import lesha3003.aes.Sbox;
 
 public final class KeySchedule {
     private KeySchedule(){}
-    public static byte[][][] getSubKeys(byte[] key, Aes.KeySize keySize) {
+    public static byte[][] getSubKeys(byte[] key, Aes.KeySize keySize) {
         if (key.length != keySize.getKeyLengthBits() / 8 ) {
             throw new IllegalArgumentException("Key has incorrect length");
         }
@@ -55,11 +55,11 @@ public final class KeySchedule {
                 wordsOfSubKeys[i] = xorWords(wordsOfSubKeys[i-keyWordCount], wordsOfSubKeys[i-1]);
             }
         }
-        byte[][][] subKeys = new byte[subKeyCount][4][4];
+        byte[][] subKeys = new byte[subKeyCount][16];
         for (int i = 0; i< subKeyCount; i++) {
             for (int j = 0; j< 4; j++){
                 for (int k = 0; k < 4; k++){
-                    subKeys[i][j][k] = wordsOfSubKeys[i*4 + k][j];
+                    subKeys[i][j*4 + k] = wordsOfSubKeys[i*4 + j][k];
                 }
             }
         }

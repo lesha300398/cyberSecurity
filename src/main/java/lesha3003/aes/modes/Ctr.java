@@ -14,14 +14,14 @@ import lesha3003.aes.keyschedule.KeySchedule;
 import lesha3003.aes.singleblockcipher.SingleBlockCipher;
 
 public final class Ctr {
-    public static void encrypt(InputStream inputStream, byte[] key, Aes.KeySize keySize, OutputStream outputStream) {
+    public static void encrypt(InputStream inputStream, byte[] key, Aes.KeySize keySize, OutputStream outputStream) throws IOException {
         if (key.length != keySize.getKeyLengthBits() / 8) {
             throw new IllegalArgumentException("Key size does not correspond to selected KrySize");
         }
-        byte[][][] subKeys = KeySchedule.getSubKeys(key, keySize);
-        long timestamp  = (new Date()).getTime();
-        int seconds = (int) timestamp/1000;
-        int milliseconds = (int) timestamp%1000;
+        byte[][] subKeys = KeySchedule.getSubKeys(key, keySize);
+        long timestamp = (new Date()).getTime();
+        int seconds = (int) timestamp / 1000;
+        int milliseconds = (int) timestamp % 1000;
         int random = (new Random()).nextInt();
         byte[] nonce = {
                 (byte) milliseconds, (byte) (milliseconds >>> 8),
@@ -29,49 +29,45 @@ public final class Ctr {
                 (byte) seconds, (byte) (seconds >>> 8), (byte) (seconds >>> 16), (byte) (seconds >>> 24),
         };
 
-        Enumeration<byte[]> blocks = BlockProvider.blocksFromInputStream(inputStream, null);
-        try {
+        BlockProvider.BlockSequence blocks = BlockProvider.blocksFromInputStream(inputStream, null);
 
-            outputStream.write(nonce);
-            long counter = 0;
-            while (blocks.hasMoreElements()) {
-                byte[] counterBlock = getCounterBlock(nonce, counter);
-                byte[] outputBlock = Utils.matrixToBytes(SingleBlockCipher.encrypt(keySize, Utils.bytesToMatrix(counterBlock), subKeys));
+        outputStream.write(nonce);
+        long counter = 0;
+        byte[] plain;
+        while ((plain = blocks.nextBlock()) != null) {
+            byte[] counterBlock = getCounterBlock(nonce, counter);
+            byte[] outputBlock = SingleBlockCipher.encrypt(keySize, counterBlock, subKeys);
 
-                byte[] cipher = Utils.xorBytes(blocks.nextElement(), outputBlock);
-                outputStream.write(cipher);
-            }
-            outputStream.flush();
-            outputStream.close();
-        } catch (IOException ex) {
-            System.out.print(ex);
+            byte[] cipher = Utils.xorBytes(plain, outputBlock);
+            outputStream.write(cipher);
         }
+        outputStream.flush();
+        outputStream.close();
     }
 
-    public static void decrypt(InputStream inputStream, byte[] key, Aes.KeySize keySize, OutputStream outputStream) {
+    public static void decrypt(InputStream inputStream, byte[] key, Aes.KeySize keySize, OutputStream outputStream) throws IOException {
         if (key.length != keySize.getKeyLengthBits() / 8) {
             throw new IllegalArgumentException("Key size does not correspond to selected KrySize");
         }
-        byte[][][] subKeys = KeySchedule.getSubKeys(key, keySize);
+        byte[][] subKeys = KeySchedule.getSubKeys(key, keySize);
         byte[] nonce = new byte[8];
-        try {
-            inputStream.read(nonce);
-            Enumeration<byte[]> blocks = BlockProvider.blocksFromInputStream(inputStream, null);
+        inputStream.read(nonce);
+        BlockProvider.BlockSequence blocks = BlockProvider.blocksFromInputStream(inputStream, null);
 
-            long counter = 0;
-            while (blocks.hasMoreElements()) {
-                byte[] counterBlock = getCounterBlock(nonce, counter);
-                byte[] outputBlock = Utils.matrixToBytes(SingleBlockCipher.encrypt(keySize, Utils.bytesToMatrix(counterBlock), subKeys));
+        long counter = 0;
+        byte[] cipher;
+        while ((cipher = blocks.nextBlock()) != null) {
+            byte[] counterBlock = getCounterBlock(nonce, counter);
+            byte[] outputBlock = SingleBlockCipher.encrypt(keySize, counterBlock, subKeys);
 
-                byte[] plain = Utils.xorBytes(blocks.nextElement(), outputBlock);
-                outputStream.write(plain);
-            }
-            outputStream.flush();
-            outputStream.close();
-        } catch (IOException ex) {
-            System.out.print(ex);
+            byte[] plain = Utils.xorBytes(cipher, outputBlock);
+            outputStream.write(plain);
         }
+        outputStream.flush();
+        outputStream.close();
+
     }
+
     private static byte[] getCounterBlock(byte[] nonce, long counter) {
         if (nonce.length != 8) {
             throw new IllegalArgumentException("Nonce has incorrect size");
@@ -80,7 +76,7 @@ public final class Ctr {
         byte[] block = new byte[16];
         for (int i = 0; i < 8; i++) {
             block[i] = nonce[i];
-            block[8+i] = counterBytes[i];
+            block[8 + i] = counterBytes[i];
         }
         return block;
     }

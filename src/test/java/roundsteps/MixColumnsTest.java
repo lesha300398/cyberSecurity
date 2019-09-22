@@ -3,6 +3,7 @@ package roundsteps;
 import org.junit.Assert;
 import org.junit.Test;
 
+import lesha3003.aes.Utils;
 import lesha3003.aes.roundsteps.MixColumns;
 
 public class MixColumnsTest {
@@ -21,10 +22,10 @@ public class MixColumnsTest {
                 {(byte) 0xA1, (byte) 0x58, (byte) 0xD7, (byte) 0xC6},
                 {(byte) 0xBC, (byte) 0x9D, (byte) 0xD6, (byte) 0xC6}
         };
+        byte[] stateBytes = Utils.matrixToBytes(state);
+        MixColumns.mixColumns(stateBytes);
 
-        byte[][] result = MixColumns.mixColumns(state);
-
-        Assert.assertArrayEquals(expectedResult,result);
+        Assert.assertArrayEquals(expectedResult,Utils.bytesToMatrix(stateBytes));
     }
     @Test
     public void invMixColumns_test() {
@@ -41,8 +42,9 @@ public class MixColumnsTest {
                 {(byte) 0x45, (byte) 0x5C, (byte) 0xD5, (byte) 0xC6}
         };
 
-        byte[][] result = MixColumns.invMixColumns(state);
+        byte[] stateBytes = Utils.matrixToBytes(state);
+        MixColumns.invMixColumns(stateBytes);
 
-        Assert.assertArrayEquals(expectedResult,result);
+        Assert.assertArrayEquals(expectedResult, Utils.bytesToMatrix(stateBytes));
     }
 }

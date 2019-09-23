@@ -7,16 +7,13 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.Date;
 import java.util.Random;
 
 import lesha3003.aes.Aes;
 import lesha3003.aes.InputStreamProvider;
 import lesha3003.aes.Utils;
-import lesha3003.aes.modes.Ctr;
 import lesha3003.aes.modes.Xts;
-import lesha3003.aes.singleblockcipher.SingleBlockCipher;
 
 public class XtsTest {
     @Test

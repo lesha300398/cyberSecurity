@@ -40,6 +40,10 @@ public final class Ctr {
 
             byte[] cipher = Utils.xorBytes(plain, outputBlock);
             outputStream.write(cipher);
+            counter++;
+            if (counter % 10000 == 0) {
+                System.out.println("Block " + counter);
+            }
         }
         outputStream.flush();
         outputStream.close();
@@ -62,6 +66,10 @@ public final class Ctr {
 
             byte[] plain = Utils.xorBytes(cipher, outputBlock);
             outputStream.write(plain);
+            counter++;
+            if (counter % 10000 == 0) {
+                System.out.println("Block " + counter);
+            }
         }
         outputStream.flush();
         outputStream.close();

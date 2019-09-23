@@ -23,7 +23,12 @@ public final class Xts {
         byte[] encryptedTweak = SingleBlockCipher.encrypt(keySize, tweak, subKeys2);
         byte[] plain;
         byte[] previousCipher = null;
+        long blockCount = 1;
         while (true) {
+            if (blockCount % 10000 == 0) {
+                System.out.println("Block " + blockCount);
+            }
+            blockCount++;
             plain = blocks.nextBlock();
             if (plain == null) {
                 if (previousCipher != null) {
@@ -53,6 +58,8 @@ public final class Xts {
                 break;
             }
         }
+        outputStream.flush();
+        outputStream.close();
 
     }
     public static void decrypt(InputStream inputStream, byte[] key1, byte[] key2, byte[] tweak, Aes.KeySize keySize, OutputStream outputStream) throws IOException {
@@ -69,7 +76,12 @@ public final class Xts {
         byte[] previousPlain = null;
         byte[] previousCipher = null;
         byte[] previousEncryptedTweak = null;
+        long blockCount = 1;
         while (true) {
+            if (blockCount % 10000 == 0) {
+                System.out.println("Block " + blockCount);
+            }
+            blockCount++;
             cipher = blocks.nextBlock();
             if (cipher == null) {
                 if (previousPlain != null) {
@@ -102,6 +114,8 @@ public final class Xts {
                 break;
             }
         }
+        outputStream.flush();
+        outputStream.close();
     }
     // https://onlinelibrary.wiley.com/doi/full/10.1002/sec.999
     private static byte[] multByAlpha(byte[] encryptedTweak) {

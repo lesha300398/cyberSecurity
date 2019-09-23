@@ -22,12 +22,12 @@ public class AesTest {
         random.nextBytes(plain);
 
         Date start = new Date();
-        byte[] cipher = aes.encrypt(key,plain);
+        byte[] cipher = aes.encrypt(plain, key, null, null);
 
         Date encrypted = new Date();
         System.out.printf("encrypted in %d milliseconds\n", encrypted.getTime() - start.getTime());
 
-        byte[] decryptedPlain = aes.decrypt(key, cipher);
+        byte[] decryptedPlain = aes.decrypt(cipher, key, null, null);
 
         Date decrypted = new Date();
         System.out.printf("decrypted in %d milliseconds\n", decrypted.getTime() - encrypted.getTime());
@@ -45,12 +45,12 @@ public class AesTest {
         random.nextBytes(plain);
 
         Date start = new Date();
-        byte[] cipher = aes.encrypt(key,plain);
+        byte[] cipher = aes.encrypt(plain, key, null, null);
 
         Date encrypted = new Date();
         System.out.printf("encrypted in %d milliseconds\n", encrypted.getTime() - start.getTime());
 
-        byte[] decryptedPlain = aes.decrypt(key, cipher);
+        byte[] decryptedPlain = aes.decrypt(cipher, key, null, null);
 
         Date decrypted = new Date();
         System.out.printf("decrypted in %d milliseconds\n", decrypted.getTime() - encrypted.getTime());
@@ -68,12 +68,12 @@ public class AesTest {
         random.nextBytes(plain);
 
         Date start = new Date();
-        byte[] cipher = aes.encrypt(key,plain);
+        byte[] cipher = aes.encrypt(plain, key, null, null);
 
         Date encrypted = new Date();
         System.out.printf("encrypted in %d milliseconds\n", encrypted.getTime() - start.getTime());
 
-        byte[] decryptedPlain = aes.decrypt(key, cipher);
+        byte[] decryptedPlain = aes.decrypt(cipher, key, null, null);
 
         Date decrypted = new Date();
         System.out.printf("decrypted in %d milliseconds\n", decrypted.getTime() - encrypted.getTime());

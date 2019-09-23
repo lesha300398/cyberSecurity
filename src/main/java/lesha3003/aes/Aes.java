@@ -1,5 +1,7 @@
 package lesha3003.aes;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -11,6 +13,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 import lesha3003.aes.modes.Ctr;
+import lesha3003.aes.modes.Xts;
 
 public final class Aes {
     public static final int COLUMN_COUNT = 4;
@@ -36,10 +39,12 @@ public final class Aes {
             }
         }
     }
+
     public enum Mode {
         CTR,
         XTS;
     }
+
     public KeySize keySize;
     public Mode mode;
 
@@ -49,47 +54,63 @@ public final class Aes {
         this.mode = mode;
     }
 
-    public void encrypt(byte[] key, InputStream inputStream, OutputStream outputStream) throws IOException {
+    public void encrypt(InputStream inputStream, OutputStream outputStream, byte[] key, byte[] secondKey, byte[] tweak) throws IOException {
         switch (mode) {
             case CTR:
                 Ctr.encrypt(inputStream, key, keySize, outputStream);
                 break;
+            case XTS:
+                if (secondKey == null || tweak == null) {
+                    throw new IllegalArgumentException("For XTS second key and tweak must not be null");
+                }
+                Xts.encrypt(inputStream, key, secondKey, tweak, keySize, outputStream);
             default:
         }
     }
-    public String encrypt(byte[] key, String hexString) throws IOException {
+
+    public String encrypt(String hexString, byte[] key, byte[] secondKey, byte[] tweak) throws IOException {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        encrypt(key, InputStreamProvider.fromHexString(hexString), outputStream);
+        encrypt(InputStreamProvider.fromHexString(hexString), outputStream, key, secondKey, tweak);
         return Utils.byteArrayToHexString(outputStream.toByteArray());
     }
-    public byte[] encrypt(byte[] key, byte[] plain) throws IOException {
+
+    public byte[] encrypt(byte[] plain, byte[] key, byte[] secondKey, byte[] tweak) throws IOException {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        encrypt(key, InputStreamProvider.fromBytes(plain), outputStream);
+        encrypt(InputStreamProvider.fromBytes(plain), outputStream, key, secondKey, tweak);
         return outputStream.toByteArray();
     }
-    public void encrypt(byte[] key, File input, File output) throws IOException {
-        encrypt(key, new FileInputStream(input), new FileOutputStream(output));
+
+    public void encrypt(File input, File output, byte[] key, byte[] secondKey, byte[] tweak) throws IOException {
+        encrypt(new BufferedInputStream(new FileInputStream(input), 4096), new BufferedOutputStream(new FileOutputStream(output), 4096), key, secondKey, tweak);
     }
 
-    public void decrypt(byte[] key, InputStream inputStream, OutputStream outputStream) throws IOException {
+    public void decrypt(InputStream inputStream, OutputStream outputStream, byte[] key, byte[] secondKey, byte[] tweak) throws IOException {
         switch (mode) {
             case CTR:
                 Ctr.decrypt(inputStream, key, keySize, outputStream);
                 break;
+            case XTS:
+                if (secondKey == null || tweak == null) {
+                    throw new IllegalArgumentException("For XTS second key and tweak must not be null");
+                }
+                Xts.decrypt(inputStream, key, secondKey, tweak, keySize, outputStream);
             default:
         }
     }
-    public String decrypt(byte[] key, String hexString) throws IOException {
+
+    public String decrypt(String hexString, byte[] key, byte[] secondKey, byte[] tweak) throws IOException {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        decrypt(key, InputStreamProvider.fromHexString(hexString), outputStream);
+        decrypt(InputStreamProvider.fromHexString(hexString), outputStream, key, secondKey, tweak);
         return Utils.byteArrayToHexString(outputStream.toByteArray());
     }
-    public byte[] decrypt(byte[] key, byte[] plain) throws IOException {
+
+    public byte[] decrypt(byte[] cipher, byte[] key, byte[] secondKey, byte[] tweak) throws IOException {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        decrypt(key, InputStreamProvider.fromBytes(plain), outputStream);
+        decrypt(InputStreamProvider.fromBytes(cipher), outputStream, key, secondKey, tweak);
         return outputStream.toByteArray();
     }
-    public void decrypt(byte[] key, File input, File output) throws IOException {
-        decrypt(key, new FileInputStream(input), new FileOutputStream(output));
+
+    public void decrypt(File input, File output, byte[] key, byte[] secondKey, byte[] tweak) throws IOException {
+        decrypt(new BufferedInputStream(new FileInputStream(input), 4096), new BufferedOutputStream(new FileOutputStream(output), 4096), key, secondKey, tweak);
     }
 }

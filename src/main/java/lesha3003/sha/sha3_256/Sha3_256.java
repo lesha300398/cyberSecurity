@@ -22,14 +22,14 @@ public final class Sha3_256 {
 
     // precomputed round constants needed by the step mapping Iota
     private static final long[] RC_CONSTANTS = {
-            0x01L, 0x8082L, 0x800000000000808aL,
-            0x8000000080008000L, 0x808bL, 0x80000001L,
-            0x8000000080008081L, 0x8000000000008009L, 0x8aL,
-            0x88L, 0x80008009L, 0x8000000aL,
-            0x8000808bL, 0x800000000000008bL, 0x8000000000008089L,
-            0x8000000000008003L, 0x8000000000008002L, 0x8000000000000080L,
-            0x800aL, 0x800000008000000aL, 0x8000000080008081L,
-            0x8000000000008080L, 0x80000001L, 0x8000000080008008L,
+            Long.reverse(0x01L), Long.reverse(0x8082L), Long.reverse(0x800000000000808aL),
+            Long.reverse(0x8000000080008000L), Long.reverse(0x808bL), Long.reverse(0x80000001L),
+            Long.reverse(0x8000000080008081L), Long.reverse(0x8000000000008009L), Long.reverse(0x8aL),
+            Long.reverse(0x88L), Long.reverse(0x80008009L), Long.reverse(0x8000000aL),
+            Long.reverse(0x8000808bL), Long.reverse(0x800000000000008bL), Long.reverse(0x8000000000008089L),
+            Long.reverse(0x8000000000008003L), Long.reverse(0x8000000000008002L), Long.reverse(0x8000000000000080L),
+            Long.reverse(0x800aL), Long.reverse(0x800000008000000aL), Long.reverse(0x8000000080008081L),
+            Long.reverse(0x8000000000008080L), Long.reverse(0x80000001L), Long.reverse(0x8000000080008008L),
     };
 
     private byte[] stateBytes = new byte[WIDTH];
@@ -52,7 +52,7 @@ public final class Sha3_256 {
         }
         byte[] hash = new byte[HASH_WIDTH];
         for (int i = 0, j = 0;;) {
-            hash[j] = stateBytes[j];
+            hash[i] = stateBytes[j];
             i++;
             j++;
             if (i >= HASH_WIDTH) {
@@ -123,11 +123,24 @@ public final class Sha3_256 {
     private void toByteState() {
         ByteBuffer buf = ByteBuffer.wrap(stateBytes);
 //        buf.order(ByteOrder.LITTLE_ENDIAN);
-        for (int i = 0; i < stateLongs.length; ++i) {
+        for (int i = 0; i < stateLongs.length; i++) {
             buf.putLong(stateLongs[i]);
         }
     }
 
+    private void printState() {
+        toByteState();
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < stateBytes.length; i+=8) {
+            for (int j = 0; j < 8; j++) {
+                sb.append(Utils.byteArrayToHexStringLittleEndian(new byte[]{stateBytes[i + j]}));
+                sb.append(" ");
+            }
+            sb.append("\n");
+        }
+        sb.append("\n\n");
+        System.out.print(sb.toString());
+    }
     private long[] theta(long[] state) {
         long c0 = state[0]^state[5]^state[10]^state[15]^state[20];
         long c1 = state[1]^state[6]^state[11]^state[16]^state[21];
@@ -157,6 +170,7 @@ public final class Sha3_256 {
             state[i+3] ^= d3;
             state[i+4] ^= d4;
         }
+//        printState();
         return state;
     }
     private long[] rho(long[] state) {
@@ -171,6 +185,7 @@ public final class Sha3_256 {
             j = oldi;
             i = (2*oldj + 3*oldi) % 5;
         }
+//        printState();
         return state;
     }
     private long[] pi(long[] state) {
@@ -182,8 +197,7 @@ public final class Sha3_256 {
             }
         }
         System.arraycopy(a, 0, state, 0 ,a.length);
-        toByteState();
-        System.out.print(Utils.byteArrayToHexStringLittleEndian(stateBytes));
+//        printState();
         return state;
     }
     private long[] chi(long[] state) {
@@ -197,10 +211,12 @@ public final class Sha3_256 {
             state[base + 3] ^= (~state[base + 4] & s0);
             state[base + 4] ^= (~s0 & s1);
         }
+//        printState();
         return state;
     }
     private long[] iota(long[] state, int round) {
         state[0] ^= RC_CONSTANTS[round];
+//        printState();
         return state;
     }
 

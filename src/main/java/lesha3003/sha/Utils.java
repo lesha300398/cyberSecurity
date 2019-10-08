@@ -18,6 +18,16 @@ public final class Utils {
         return data;
     }
 
+    public static byte[] hexStringToByteArrayLittleEndian(String s) {
+        int len = s.length();
+        byte[] data = new byte[len / 2];
+        for (int i = 0; i < len; i += 2) {
+            data[i / 2] = (byte) Integer.rotateRight(Integer.reverse((Character.digit(s.charAt(i), 16) << 4)
+                    + Character.digit(s.charAt(i+1), 16)), 24);
+        }
+        return data;
+    }
+
     public  static String byteArrayToHexString(byte[] bytes) {
         char[] hexChars = new char[bytes.length * 2];
         for (int j = 0; j < bytes.length; j++) {
@@ -31,7 +41,7 @@ public final class Utils {
     public  static String byteArrayToHexStringLittleEndian(byte[] bytes) {
         char[] hexChars = new char[bytes.length * 2];
         for (int j = 0; j < bytes.length; j++) {
-            int v = Integer.reverse(bytes[j] & 0xFF) >>> 24;
+            int v = Integer.rotateRight(Integer.reverse(bytes[j] & 0xFF), 24);
             hexChars[j * 2] = HEX_ARRAY[v >>> 4];
             hexChars[j * 2 + 1] = HEX_ARRAY[v & 0x0F];
         }
@@ -42,6 +52,14 @@ public final class Utils {
         byte[] data = new byte[len];
         for (int i = 0; i < len; i++) {
             data[i] = (byte) s.charAt(i);
+        }
+        return data;
+    }
+    public static byte[] stringToByteArrayLittleEndian(String s) {
+        int len = s.length();
+        byte[] data = new byte[len];
+        for (int i = 0; i < len; i++) {
+            data[i] = (byte) Integer.rotateRight(Integer.reverse(s.charAt(i)), 24);
         }
         return data;
     }

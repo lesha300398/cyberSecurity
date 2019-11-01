@@ -1,5 +1,6 @@
 package lesha3003.digitalsignature.rsa;
 
+import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.util.Random;
 
@@ -18,6 +19,10 @@ public final class RsaCore {
         this.modulus = p.multiply(q);
         this.pk = new BigUInt(65537);
         this.sk = pk.modInv(phi);
+
+        System.out.println("Modulus: " + new BigInteger(modulus.toByteArrayStartsWithZero()).toString());
+        System.out.println("Public key: " + new BigInteger(pk.toByteArrayStartsWithZero()).toString());
+        System.out.println("Secret key: " + new BigInteger(sk.toByteArrayStartsWithZero()).toString());
     }
     public RsaCore(int pInt, int qInt, int eInt) {
         BigUInt p = new BigUInt(pInt);

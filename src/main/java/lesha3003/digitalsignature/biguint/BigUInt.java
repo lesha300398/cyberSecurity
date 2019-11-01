@@ -1,22 +1,22 @@
 package lesha3003.digitalsignature.biguint;
 
+
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
+import java.nio.ByteBuffer;
+import java.util.Arrays;
 import java.util.Random;
 
 public final class BigUInt {
-    private final static int BASE_BITS = 8;
+    private final static int BASE_BITS = 32;
     private final static int BASE_INT = (int) Math.pow(2, BASE_BITS);
 
     //    private boolean negative = false;
-    private List<Integer> digits;
+    private int[] digits;
 
-    private static BigUInt ZERO = new BigUInt(0, new ArrayList<Integer>(1));
-    private static BigUInt ONE = new BigUInt(1, new ArrayList<Integer>(1));
-    private static BigUInt TWO = new BigUInt(2, new ArrayList<Integer>(1));
-    private static BigUInt BASE = new BigUInt(BASE_INT, new ArrayList<Integer>(1));
+    private static BigUInt ZERO = new BigUInt(0);
+    private static BigUInt ONE = new BigUInt(1);
+    private static BigUInt TWO = new BigUInt(2);
+//    private static BigUInt BASE = new BigUInt(BASE_INT, new ArrayList<Integer>(1));
 
     public static BigUInt zero() {
         return ZERO;
@@ -30,67 +30,124 @@ public final class BigUInt {
         return TWO;
     }
 
+    private static int[] trimZeroes(int[] digits) {
+        if (digits[digits.length - 1] != 0 || digits.length == 1) {
+            return digits;
+        }
+        int newSize = digits.length;
+
+        while (newSize > 1 && digits[newSize - 1] == 0) {
+            newSize--;
+        }
+        int[] temp = new int[newSize];
+        System.arraycopy(digits, 0, temp, 0, newSize);
+        return temp;
+    }
+
+
     public BigUInt(int value) {
-        this(value, new ArrayList<Integer>(500));
+        this.digits = new int[]{value};
+    }
+
+    public BigUInt(long value) {
+        if (value >>> 32 != 0) {
+            this.digits = new int[]{(int) value, (int) (value >>> 32)};
+        } else {
+            this.digits = new int[]{(int) value};
+        }
     }
 
     public BigUInt copy() {
-        BigUInt result = new BigUInt();
-        for (Integer integer : this.digits) {
-            result.digits.add(integer.intValue());
-        }
-        return result;
+        int[] newDigits = new int[this.digits.length];
+        System.arraycopy(this.digits, 0, newDigits, 0, newDigits.length);
+        return new BigUInt(newDigits);
     }
 
-    private BigUInt() {
-        this(new ArrayList<Integer>(500));
-    }
+//    private BigUInt() {
+//        this(new ArrayList<Integer>(150));
+//    }
 
-    private BigUInt(int value, List<Integer> list) {
-        this(list);
-        if (value == 0) {
-            digits.add(0);
-            return;
-        }
-        while (value > 0) {
-            digits.add(value % BASE_INT);
-            value /= BASE_INT;
-        }
-    }
+//    private BigUInt(int value, List<Integer> list) {
+//        this(list);
+//        digits.add(value);
+////        if (value == 0) {
+////            digits.add(0);
+////            return;
+////        }
+////        while (value > 0) {
+////            digits.add(value % BASE_INT);
+////            value /= BASE_INT;
+////        }
+//    }
 
-    private BigUInt(List<Integer> list) {
-        this.digits = list;
+    private BigUInt(int[] digits) {
+        this.digits = digits;
     }
 
     public BigUInt(byte[] bytes) {
-        this(new ArrayList<Integer>(bytes.length));
-        for (byte elem : bytes) {
-            digits.add(elem & 0x000000FF);
+        this.digits = new int[bytes.length / 4 + (bytes.length % 4 == 0 ? 0 : 1)];
+        for (int i = bytes.length - 1; i >= 3; i = i - 4) {
+            this.digits[(bytes.length - i) / 4] = (bytes[i] & 0xFF) | ((bytes[i - 1] & 0xFF) << 8) | ((bytes[i - 2] & 0xFF) << 16) | ((bytes[i - 3] & 0xFF) << 24);
         }
-        if (digits.size() > 0) {
-            while (digits.get(digits.size() - 1) == 0){
-                digits.remove(digits.size() - 1);
-            }
-        } else {
-            digits.add(0);
+        switch (bytes.length % 4) {
+            case 3:
+                this.digits[this.digits.length - 1] = (bytes[2] & 0xFF) | ((bytes[1] & 0xFF) << 8) | ((bytes[0] & 0xFF) << 16);
+                break;
+            case 2:
+                this.digits[this.digits.length - 1] = (bytes[1] & 0xFF) | ((bytes[0] & 0xFF) << 8);
+                break;
+            case 1:
+                this.digits[this.digits.length - 1] = (bytes[0] & 0xFF);
+                break;
+            default:
+                break;
         }
+        this.digits = trimZeroes(this.digits);
     }
 
     public byte[] toByteArray() {
-        byte[] result = new byte[this.digits.size()];
-        for (int i = 0; i < this.digits.size(); i++) {
-            result[i] = (byte) this.digits.get(i).intValue();
+        byte[] temp = new byte[this.digits.length * 4];
+        for (int i = 0; i < this.digits.length; i++) {
+            System.arraycopy(ByteBuffer.allocate(4).putInt(this.digits[this.digits.length - i - 1]).array(), 0, temp, 4 * i, 4);
         }
-        return result;
+
+        int size = temp.length;
+        while (temp[temp.length - size] == 0 && size > 1) {
+            size--;
+        }
+        if (size == temp.length) {
+            return temp;
+        } else {
+            return Arrays.copyOfRange(temp, temp.length - size, temp.length);
+        }
+    }
+    public byte[] toByteArrayStartsWithZero() {
+        byte[] temp = new byte[this.digits.length * 4];
+        for (int i = 0; i < this.digits.length; i++) {
+            System.arraycopy(ByteBuffer.allocate(4).putInt(this.digits[this.digits.length - i - 1]).array(), 0, temp, 4 * i, 4);
+        }
+
+        int size = temp.length;
+        while (temp[temp.length - size] == 0 && size > 1) {
+            size--;
+        }
+        if (temp[temp.length - size] >>> 7 == 0) {
+            return Arrays.copyOfRange(temp, temp.length - size, temp.length);
+        } else {
+            byte[] result = new byte[size + 1];
+            result[0] = 0;
+            System.arraycopy(temp, temp.length - size, result, result.length - size, size);
+            return result;
+        }
     }
 
     public boolean equals(BigUInt other) {
-        if (this.digits.size() != other.digits.size()) {
+        if (this.digits.length != other.digits.length) {
             return false;
         }
 
-        for (int i = this.digits.size() - 1; i >= 0; i--) {
-            if (this.digits.get(i).intValue() != other.digits.get(i).intValue()) {
+        for (int i = this.digits.length - 1; i >= 0; i--) {
+            if (this.digits[i] != other.digits[i]) {
                 return false;
             }
         }
@@ -99,184 +156,227 @@ public final class BigUInt {
 
 
     public boolean greaterThan(BigUInt other) {
-        if (this.digits.size() != other.digits.size()) {
-            return this.digits.size() > other.digits.size();
+        if (this.digits.length != other.digits.length) {
+            return this.digits.length > other.digits.length;
         }
 
-        for (int i = this.digits.size() - 1; i >= 0; i--) {
-            if (this.digits.get(i).intValue() != other.digits.get(i).intValue()) {
-                return this.digits.get(i) > other.digits.get(i);
+        for (int i = this.digits.length - 1; i >= 0; i--) {
+            if (this.digits[i] != other.digits[i]) {
+                return ((long) this.digits[i] & 0xFFFFFFFFL) > ((long) other.digits[i] & 0xFFFFFFFFL);
             }
         }
         return false;
     }
 
     public boolean greaterThanOrEquals(BigUInt other) {
-        if (this.digits.size() != other.digits.size()) {
-            return this.digits.size() > other.digits.size();
+        if (this.digits.length != other.digits.length) {
+            return this.digits.length > other.digits.length;
         }
-        for (int i = this.digits.size() - 1; i >= 0; i--) {
-            if (this.digits.get(i).intValue() != other.digits.get(i).intValue()) {
-                return this.digits.get(i) > other.digits.get(i);
+        for (int i = this.digits.length - 1; i >= 0; i--) {
+            if (this.digits[i] != other.digits[i]) {
+                return ((long) this.digits[i] & 0xFFFFFFFFL) > ((long) other.digits[i] & 0xFFFFFFFFL);
             }
         }
         return true;
     }
 
     public BigUInt add(BigUInt other) {
-        int thisSize = this.digits.size();
-        int otherSize = other.digits.size();
-        BigUInt shorter, longer;
-        if (thisSize < otherSize) {
-            shorter = this;
-            longer = other;
+        return new BigUInt(add(this.digits, other.digits));
+    }
+
+    private int[] add(int[] first, int[] second) {
+
+        int[] shorter, longer;
+        if (first.length < second.length) {
+            shorter = first;
+            longer = second;
         } else {
-            shorter = other;
-            longer = this;
+            shorter = second;
+            longer = first;
         }
-        BigUInt result = new BigUInt();
-        int carry = 0;
-        for (int i = 0; i < shorter.digits.size(); i++) {
-            int sum = shorter.digits.get(i) + longer.digits.get(i) + carry;
-            result.digits.add(sum % BASE_INT);
-            carry = sum >> BASE_BITS;
+        int[] result = new int[longer.length];
+        long sum = 0;
+        int i = 0;
+        for (; i < shorter.length; i++) {
+            result[i] = (int) (sum = ((long) shorter[i] & 0xFFFFFFFFL) + ((long) longer[i] & 0xFFFFFFFFL) + (sum >>> 32));
         }
-        for (int i = shorter.digits.size(); i < longer.digits.size(); i++) {
-            if (carry == 0) {
-                break;
-            }
-            int sum = longer.digits.get(i) + carry;
-            result.digits.add(sum % BASE_INT);
-            carry = sum >> BASE_BITS;
+        boolean bool;
+        for (bool = sum >>> 32 != 0; bool && i < longer.length; i++) {
+            bool = (result[i] = longer[i] + 1) == 0;
         }
-        if (carry > 0) {
-            result.digits.add(carry);
+        for (; i < longer.length; i++) {
+            result[i] = longer[i];
+        }
+        if (bool) {
+            int[] temp = new int[result.length + 1];
+            System.arraycopy(result, 0, temp, 0, result.length);
+            temp[result.length] = 1;
+            return temp;
         }
         return result;
     }
 
     public BigUInt subtract(BigUInt other) {
-        return this.copy().subtractFromThis(other);
-    }
-
-    private BigUInt subtractFromThis(BigUInt other) {
         if (other.greaterThan(this)) {
             throw new IllegalArgumentException();
         }
-        int carry = 0;
-        for (int i = 0; i < other.digits.size(); i++) {
-            int diff = this.digits.get(i) - other.digits.get(i) + carry;
-            if (diff < 0) {
-                this.digits.set(i, diff + BASE_INT);
-                carry = -1;
-            } else {
-                this.digits.set(i, diff);
-                carry = 0;
-            }
-        }
-        for (int i = other.digits.size(); i < this.digits.size(); i++) {
-            if (carry == 0) {
-                break;
-            }
-            int diff = this.digits.get(i) + carry;
-            if (diff < 0) {
-                this.digits.set(i, diff + BASE_INT);
-                carry = -1;
-            } else {
-                this.digits.set(i, diff);
-                carry = 0;
-            }
-        }
-        for (int i = this.digits.size() - 1; i > 0; i--) {
-            if (this.digits.get(i) == 0) {
-                this.digits.remove(i);
-            } else {
-                break;
-            }
-        }
-        return this;
+        return subtractTrusted(other);
     }
 
-    private BigUInt addToThis(BigUInt other) {
-        int thisSize = this.digits.size();
-        int otherSize = other.digits.size();
-        int carry = 0;
-        if (thisSize < otherSize) {
-            for (int i = 0; i < thisSize; i++) {
-                int sum = this.digits.get(i) + other.digits.get(i) + carry;
-                this.digits.set(i, sum % BASE_INT);
-                carry = sum / BASE_INT;
-            }
-            for (int i = thisSize; i < otherSize; i++) {
-                int sum = other.digits.get(i) + carry;
-                this.digits.add(sum % BASE_INT);
-                carry = sum / BASE_INT;
-            }
-            if (carry > 0) {
-                this.digits.add(carry);
-            }
-        } else if (thisSize == otherSize) {
-            for (int i = 0; i < thisSize; i++) {
-                int sum = this.digits.get(i) + other.digits.get(i) + carry;
-                this.digits.set(i, sum % BASE_INT);
-                carry = sum / BASE_INT;
-            }
-            if (carry > 0) {
-                this.digits.add(carry);
-            }
-        } else {
-            for (int i = 0; i < otherSize; i++) {
-                int sum = this.digits.get(i) + other.digits.get(i) + carry;
-                this.digits.set(i, sum % BASE_INT);
-                carry = sum / BASE_INT;
-            }
-            for (int i = otherSize; i < thisSize; i++) {
-                if (carry == 0) {
-                    break;
-                }
-                int sum = this.digits.get(i) + carry;
-                this.digits.set(i, sum % BASE_INT);
-                carry = sum / BASE_INT;
-            }
-            if (carry > 0) {
-                this.digits.add(carry);
-            }
-        }
-        return this;
+    private BigUInt subtractTrusted(BigUInt other) {
+        return new BigUInt(subtract(this.digits, other.digits));
     }
+
+    private static int[] subtract(int[] from, int[] other) {
+        long diff = 0;
+        int[] result = new int[from.length];
+        int i = 0;
+        for (; i < other.length; i++) {
+            diff = ((long) from[i] & 0xFFFFFFFFL) - ((long) other[i] & 0xFFFFFFFFL) + (diff >> 32);
+            result[i] = (int) diff;
+        }
+        boolean bool;
+        for (bool = diff >> 32 != 0; i < from.length && bool; i++) {
+            bool = (result[i] = (int) ((long) from[i] & 0xFFFFFFFFL) - 1) == -1;
+        }
+        for (; i < from.length; i++) {
+            result[i] = from[i];
+        }
+        return trimZeroes(result);
+    }
+
+//    private BigUInt subtractFromThis(BigUInt other) {
+//        this.digits = subtractTrusted(this.digits, other.digits);
+//        return this;
+//    }
+
+//    private BigUInt addToThis(BigUInt other) {
+//        int thisSize = this.digits.size();
+//        int otherSize = other.digits.size();
+//        long carry = 0;
+//        if (thisSize < otherSize) {
+//            for (int i = 0; i < thisSize; i++) {
+//                long sum = ((long)this.digits.get(i) & 0xFFFFFFFFL) + ((long)other.digits.get(i) & 0xFFFFFFFFL) + carry;
+//                this.digits.set(i, (int)(sum & 0xFFFFFFFFL));
+//                carry = sum >>> 32;
+//            }
+//            for (int i = thisSize; i < otherSize; i++) {
+//                long sum = other.digits.get(i) + carry;
+//                this.digits.add((int)(sum & 0xFFFFFFFFL));
+//                carry = sum >>> 32;
+//            }
+//            if (carry > 0) {
+//                this.digits.add((int)(carry & 0xFFFFFFFFL));
+//            }
+//        } else if (thisSize == otherSize) {
+//            for (int i = 0; i < thisSize; i++) {
+//                long sum = ((long)this.digits.get(i) & 0xFFFFFFFFL) + ((long)other.digits.get(i) & 0xFFFFFFFFL) + carry;
+//                this.digits.set(i, (int)(sum & 0xFFFFFFFFL));
+//                carry = sum >>> 32;
+//            }
+//            if (carry > 0) {
+//                this.digits.add((int)(carry & 0xFFFFFFFFL));
+//            }
+//        } else {
+//            for (int i = 0; i < otherSize; i++) {
+//                long sum = ((long)this.digits.get(i) & 0xFFFFFFFFL) + ((long)other.digits.get(i) & 0xFFFFFFFFL) + carry;
+//                this.digits.set(i, (int)(sum & 0xFFFFFFFFL));
+//                carry = sum >>> 32;
+//            }
+//            for (int i = otherSize; i < thisSize; i++) {
+//                long sum = this.digits.get(i) + carry;
+//                this.digits.set(i, (int)(sum & 0xFFFFFFFFL));
+//                carry = sum >>> 32;
+//            }
+//            if (carry > 0) {
+//                this.digits.add((int)(carry & 0xFFFFFFFFL));
+//            }
+//        }
+//        return this;
+//    }
 
     public BigUInt multiply(BigUInt other) {
-        BigUInt result = new BigUInt(0);
-        BigUInt temp = new BigUInt();
-        for (int i = 0; i < this.digits.size(); i++) {
-            temp.digits.clear();
-            for (int k = 0; k < i; k++) {
-                temp.digits.add(0);
-            }
-            int carry = 0;
-            for (int j = 0; j < other.digits.size(); j++) {
-                int product = this.digits.get(i) * other.digits.get(j) + carry;
-                temp.digits.add(product % BASE_INT);
-                carry = product / BASE_INT;
-            }
-            if (carry > 0) {
-                temp.digits.add(carry);
-            }
-            result.addToThis(temp);
+        if (this.digits.length >= 80 && other.digits.length >= 80) {
+            return multiplyKaratsuba(this, other);
+        } else {
+            return new BigUInt(multiplyArrays(this.digits, other.digits));
         }
-        return result;
+    }
+
+    private static int[] multiplyArrays(int[] first, int[] second) {
+        int[] result = new int[first.length + second.length];
+        long prod = 0;
+        int i, j;
+        for (i = 0; i < first.length; i++) {
+            result[i] = (int) (prod = ((long) first[i] & 0xFFFFFFFFL) * ((long) second[0] & 0xFFFFFFFFL) + (prod >>> 32));
+        }
+
+        result[first.length] = (int) (prod >>> 32);
+
+        int resultIndex;
+        for (i = 1; i < second.length; i++) {
+            prod = 0;
+            resultIndex = i;
+            for (j = 0; j < first.length; j++) {
+                result[resultIndex] = (int) (prod = ((long) result[resultIndex] & 0xFFFFFFFFL) + ((long) first[j] & 0xFFFFFFFFL) * ((long) second[i] & 0xFFFFFFFFL) + (prod >>> 32));
+                resultIndex++;
+            }
+
+            result[resultIndex] = (int) (prod >>> 32);
+        }
+        return trimZeroes(result);
+    }
+
+    private static BigUInt multiplyKaratsuba(BigUInt first, BigUInt second) {
+        int m = (Math.max(first.digits.length, second.digits.length) + 1) / 2;
+        BigUInt first0 = first.getLower(m);
+        BigUInt first1 = first.getUpper(m);
+        BigUInt second0 = second.getLower(m);
+        BigUInt second1 = second.getUpper(m);
+        BigUInt z2 = first1.multiply(second1);
+        BigUInt z0 = first0.multiply(second0);
+        BigUInt z1 = (first1.add(first0)).multiply(second1.add(second0)).subtractTrusted(z2).subtractTrusted(z0);
+        return (z2.shiftLeftDigits(2 * m)).add(z1.shiftLeftDigits(m)).add(z0);
+
+    }
+
+    private BigUInt getUpper(int offset) {
+        if (this.digits.length < offset) {
+            return ZERO.copy();
+        }
+        int[] resultArray = new int[this.digits.length - offset];
+        System.arraycopy(this.digits, offset, resultArray, 0, resultArray.length);
+        return new BigUInt(trimZeroes(resultArray));
+    }
+
+    private BigUInt getLower(int offset) {
+        int size = Math.min(offset, this.digits.length);
+
+        int[] resultArray = new int[size];
+        System.arraycopy(this.digits, 0, resultArray, 0, size);
+        return new BigUInt(trimZeroes(resultArray));
+    }
+
+    private BigUInt shiftLeftDigits(int offset) {
+        int[] resultArray = new int[digits.length + offset];
+        for (int i = 0; i < offset; i++) {
+            resultArray[i] = 0;
+        }
+        System.arraycopy(this.digits, 0, resultArray, offset, this.digits.length);
+        return new BigUInt(resultArray);
     }
 
     public BigUInt mod(BigUInt other) {
-        BigUInt result = this.copy();
-        while (result.greaterThanOrEquals(other)) {
-            BigUInt temp = other.copy();
-            while (result.greaterThan(temp.multiply(TWO).addToThis(other))) {
-                temp = temp.multiply(TWO);
-            }
-            result.subtractFromThis(temp);
-        }
-        return result;
+        return this.divide(other)[1];
+//        BigUInt result = this;
+//        while (result.greaterThanOrEquals(other)) {
+//            BigUInt temp = other;
+//            while (result.greaterThan(temp.multiply(TWO).add(other))) {
+//                temp = temp.multiply(TWO);
+//            }
+//            result = result.subtractTrusted(temp);
+//        }
+//        return result;
     }
 
     /**
@@ -287,53 +387,108 @@ public final class BigUInt {
         if (other.greaterThan(this)) {
             return new BigUInt[]{ZERO.copy(), this.copy()};
         }
-        BigUInt carry = ZERO.copy();
-        int currentIndex = this.digits.size() - 1;
-        LinkedList<Integer> resultList = new LinkedList<>();
-        BigUInt temp = new BigUInt();
-        for (int i = this.digits.size() - other.digits.size() + 1; i < this.digits.size(); i++) {
-            temp.digits.add(this.digits.get(i).intValue());
-        }
-        if (temp.digits.isEmpty()) {
-            temp.digits.add(0);
-        }
-        for (int i = 0; i <= this.digits.size() - other.digits.size(); i++) {
-            temp.multiplyThisByBase().addToThis(new BigUInt(this.digits.get(this.digits.size() - other.digits.size() - i), new ArrayList<Integer>(1)));
+//        BigUInt carry = ZERO.copy();
+//        int currentIndex = this.digits.size() - 1;
+        int[] temp = this.copy().digits;
+        int[] resultArray = new int[temp.length - other.digits.length + 1];
+        for (int start = temp.length - other.digits.length; start >= 0; start--) {
             int q = 0;
-            while (temp.greaterThanOrEquals(other)) {
-                temp.subtractFromThis(other);
-                q++;
+            while (arrayGreaterOrEqualWithOffset(temp, start, other.digits)) {
+                long coef = 1;
+                BigUInt tempInt1 = other;
+                BigUInt tempInt2 = other.multiply(TWO);
+                while (arrayGreaterOrEqualWithOffset(temp, start, tempInt2.digits)) {
+                    coef *= 2;
+                    tempInt1 = tempInt2;
+                    tempInt2 = tempInt2.multiply(TWO);
+                }
+                subtractFromArrayWithOffset(temp, start, tempInt1.digits);
+                q += coef;
             }
-            resultList.addFirst(q);
+            resultArray[start] = q;
         }
-        while (resultList.peekLast() == 0) {
-            resultList.removeLast();
+        return new BigUInt[]{new BigUInt(trimZeroes(resultArray)), new BigUInt(trimZeroes(temp))};
+    }
+    private BigUInt shiftLeft1Bit() {
+        boolean newDigit = (this.digits[this.digits.length - 1] >>> 31) != 0;
+        int[] result = new int[this.digits.length + (newDigit ? 1 : 0)];
+        for (int i = this.digits.length - 1; i >= 1; i--) {
+            result[i] = (this.digits[i] << 1) ^ (this.digits[i-1] >>> 31);
         }
-        return new BigUInt[]{new BigUInt(new ArrayList<>(resultList)), temp};
+        result[0] = this.digits[0] << 1;
+        if (newDigit) {
+            result[result.length - 1] = 1;
+        }
+        return new BigUInt(result);
     }
 
-    private BigUInt multiplyThisByBase() {
-        if (this.equals(ZERO)) {
-            return this;
+    private static boolean arrayGreaterOrEqualWithOffset(int[] first, int start, int[] other) {
+        int actualLen = first.length - start;
+        while (first[start + actualLen - 1] == 0 && actualLen > 1) {
+            actualLen--;
         }
-        ArrayList<Integer> newDigits = new ArrayList<>(this.digits.size() + 1);
-        newDigits.add(0);
-        newDigits.addAll(this.digits);
-        this.digits = newDigits;
-        return this;
+        if (actualLen != other.length) {
+            return actualLen > other.length;
+        }
+        for (int i = actualLen - 1; i >= 0; i--) {
+            if (first[i + start] != other[i]) {
+                return ((long) first[i + start] & 0xFFFFFFFFL) > ((long) other[i] & 0xFFFFFFFFL);
+            }
+        }
+        return true;
     }
+
+    private static void subtractFromArrayWithOffset(int[] from, int start, int[] other) {
+        if (!arrayGreaterOrEqualWithOffset(from, start, other)) {
+            throw new IllegalArgumentException();
+        }
+        int actualLen = from.length - start;
+        while (from[start + actualLen - 1] == 0 && actualLen > 1) {
+            actualLen--;
+        }
+        long carry = 0;
+        for (int i = start; i < start + other.length; i++) {
+            long diff = ((long) from[i] & 0xFFFFFFFFL) - ((long) other[i - start] & 0xFFFFFFFFL) + carry;
+            if (diff < 0) {
+                from[i] = (int) ((diff + 0x0100000000L) & 0xFFFFFFFFL);
+                carry = -1;
+            } else {
+                from[i] = (int) (diff & 0xFFFFFFFFL);
+                carry = 0;
+            }
+        }
+        for (int i = other.length + start; i < start + actualLen; i++) {
+            if (carry == 0) {
+                break;
+            }
+            long diff = ((long) from[i] & 0xFFFFFFFFL) + carry;
+            if (diff < 0) {
+                from[i] = (int) ((diff + 0x0100000000L) & 0xFFFFFFFFL);
+                carry = -1;
+            } else {
+                from[i] = (int) (diff & 0xFFFFFFFFL);
+                carry = 0;
+            }
+        }
+    }
+
+//    private BigUInt multiplyThisByBase() {
+//        if (this.equals(ZERO)) {
+//            return this;
+//        }
+//        ArrayList<Integer> newDigits = new ArrayList<>(this.digits.size() + 1);
+//        newDigits.add(0);
+//        newDigits.addAll(this.digits);
+//        this.digits = newDigits;
+//        return this;
+//    }
 
     private BigUInt divideThisByTwo() {
-        int valToAdd = BASE_INT >> 1;
-        boolean addValue = false;
-        for (int i = this.digits.size() - 1; i >= 0; i--) {
-            int current = this.digits.get(i);
-            this.digits.set(i, (current >> 1) + (addValue ? valToAdd : 0));
-            addValue = current % 2 > 0;
+        for (int i = 0; i < this.digits.length - 1; i++) {
+            this.digits[i] = (this.digits[i] >>> 1) ^ (this.digits[i + 1] << 31);
         }
-        if (this.digits.get(this.digits.size() - 1) == 0) {
-            this.digits.remove(this.digits.size() - 1);
-        }
+        this.digits[this.digits.length - 1] >>>= 1;
+        this.digits = trimZeroes(this.digits);
         return this;
     }
 
@@ -345,7 +500,7 @@ public final class BigUInt {
         BigUInt exponent = exp.copy();
         BigUInt result = ONE.copy();
         while (exponent.greaterThan(ZERO)) {
-            if (exponent.digits.get(0) % 2 == 1) {
+            if ((exponent.digits[0] << 31) != 0) {
                 result = result.multiply(base).mod(modulus);
             }
             exponent.divideThisByTwo();
@@ -375,25 +530,20 @@ public final class BigUInt {
 //            si = sii.addToThis(si.multiply(res[0]));
 //            sii = temp;
             temp = ti.copy();
-            ti = tii.addToThis(ti.multiply(res[0]));
+            ti = tii.add(ti.multiply(res[0]));
             tii = temp;
         }
         if (i % 2 == 0) {
-            return modulus.subtract(ti);
+            return modulus.subtractTrusted(ti);
         } else {
             return ti;
         }
     }
 
     public static BigUInt probablePrime(int bitLength, Random rnd) {
-        BigUInt result = new BigUInt();
-        byte[] bigIntegerBytes = BigInteger.probablePrime(bitLength, rnd).toByteArray();
-        for (int i = bigIntegerBytes.length - 1; i >= 0; i--) {
-            result.digits.add(bigIntegerBytes[i] & 0xFF);
-        }
-        if (result.digits.get(result.digits.size() - 1) == 0) {
-            result.digits.remove(result.digits.size() - 1);
-        }
-        return result;
+        BigInteger bigInteger = BigInteger.probablePrime(bitLength, rnd);
+//        byte[] bigIntegerBytes = BigInteger.probablePrime(bitLength, rnd).toByteArray();
+
+        return new BigUInt(bigInteger.toByteArray());
     }
 }

@@ -4,58 +4,62 @@ import org.junit.function.ThrowingRunnable;
 
 import java.math.BigInteger;
 import java.security.SecureRandom;
-import java.util.Date;
 import java.util.Random;
 
 import lesha3003.digitalsignature.biguint.BigUInt;
 
 public final class BigUIntTest {
     @Test
-    public void equalsTrue_test(){
-        int intVal = 23983452;
+    public void equalsTrue_test() {
+        long intVal = 2398345227836582L;
         BigUInt val1 = new BigUInt(intVal);
         BigUInt val2 = new BigUInt(intVal);
 
         Assert.assertTrue(val1.equals(val2) && val2.equals(val1));
     }
+
     @Test
-    public void equalsFalse_test(){
-        int intVal1 = 23983452;
-        int intVal2 = 574832913;
+    public void equalsFalse_test() {
+        long intVal1 = 2398345298372523L;
+        long intVal2 = 57483291327285L;
         BigUInt val1 = new BigUInt(intVal1);
         BigUInt val2 = new BigUInt(intVal2);
 
         Assert.assertTrue(!val1.equals(val2) && !val2.equals(val1));
     }
+
     @Test
-    public void greaterThan_equal_test(){
-        int intVal = 23983452;
+    public void greaterThan_equal_test() {
+        long intVal = 239834522345566L;
         BigUInt val1 = new BigUInt(intVal);
         BigUInt val2 = new BigUInt(intVal);
 
         Assert.assertTrue(!val1.greaterThan(val2) && !val2.greaterThan(val1));
     }
+
     @Test
-    public void greaterThan_greater_test(){
-        int intVal1 = 23983452;
-        int intVal2 = 574832913;
+    public void greaterThan_greater_test() {
+        long intVal1 = 23983452387465L;
+        long intVal2 = 5748329138273623567L;
         BigUInt val1 = new BigUInt(intVal1);
         BigUInt val2 = new BigUInt(intVal2);
 
         Assert.assertTrue(!val1.greaterThan(val2) && val2.greaterThan(val1));
     }
+
     @Test
-    public void greaterThanOrEqual_equal_test(){
-        int intVal = 23983452;
+    public void greaterThanOrEqual_equal_test() {
+        long intVal = 239834526789023425L;
         BigUInt val1 = new BigUInt(intVal);
         BigUInt val2 = new BigUInt(intVal);
 
         Assert.assertTrue(val1.greaterThanOrEquals(val2) && val2.greaterThanOrEquals(val1));
     }
+
     @Test
-    public void greaterThanOrEqual_greater_test(){
-        int intVal1 = 23983452;
-        int intVal2 = 574832913;
+    public void greaterThanOrEqual_greater_test() {
+        long intVal1 = 239834528473549L;
+        long intVal2 = 574832913487835324L;
         BigUInt val1 = new BigUInt(intVal1);
         BigUInt val2 = new BigUInt(intVal2);
 
@@ -63,9 +67,9 @@ public final class BigUIntTest {
     }
 
     @Test
-    public void add_test(){
-        int intVal1 = 23983452;
-        int intVal2 = 574832913;
+    public void add_test() {
+        long intVal1 = (long) Integer.MAX_VALUE * 20;
+        long intVal2 = (long) Integer.MAX_VALUE * 1000;
         BigUInt val1 = new BigUInt(intVal1);
         BigUInt val2 = new BigUInt(intVal2);
         BigUInt expectedSum = new BigUInt(intVal1 + intVal2);
@@ -75,10 +79,11 @@ public final class BigUIntTest {
 
         Assert.assertTrue(expectedSum.equals(sum1) && expectedSum.equals(sum2));
     }
+
     @Test
-    public void subtract_test(){
-        int intVal1 = 23983452;
-        int intVal2 = 574832913;
+    public void subtract_test() {
+        long intVal1 = (long) Integer.MAX_VALUE * 20;
+        long intVal2 = (long) Integer.MAX_VALUE * 1000;
         final BigUInt val1 = new BigUInt(intVal1);
         final BigUInt val2 = new BigUInt(intVal2);
         BigUInt expectedDiff = new BigUInt(intVal2 - intVal1);
@@ -95,10 +100,12 @@ public final class BigUIntTest {
         Assert.assertTrue(expectedDiff.equals(diff));
         Assert.assertThrows(IllegalArgumentException.class, wrongDiff);
     }
+
     @Test
-    public void multiply_test(){
-        int intVal1 = 1000;
-        int intVal2 = 1890;
+    public void multiply_test() {
+        long intVal1 = (long) Integer.MAX_VALUE + 1;
+        long intVal2 = (long) Integer.MAX_VALUE + 2;
+        long prod = intVal1 * intVal2;
         BigUInt val1 = new BigUInt(intVal1);
         BigUInt val2 = new BigUInt(intVal2);
         BigUInt expectedProduct = new BigUInt(intVal1 * intVal2);
@@ -108,10 +115,11 @@ public final class BigUIntTest {
 
         Assert.assertTrue(expectedProduct.equals(product1) && expectedProduct.equals(product2));
     }
+
     @Test
-    public void mod_test(){
-        int intModulus = 100098;
-        int intVal = 1890778;
+    public void mod_test() {
+        long intModulus = (long) Integer.MAX_VALUE + 1;
+        long intVal = (long) Integer.MAX_VALUE * 2934879234L;
         BigUInt val = new BigUInt(intVal);
         BigUInt modulus = new BigUInt(intModulus);
         BigUInt expectedResult = new BigUInt(intVal % intModulus);
@@ -120,7 +128,8 @@ public final class BigUIntTest {
 
         Assert.assertTrue(expectedResult.equals(result));
     }
-//    @Test
+
+    //    @Test
 //    public void divideThisByTwo_test(){
 //        int intVal = 300;
 //        BigUInt val = new BigUInt(intVal);
@@ -132,11 +141,15 @@ public final class BigUIntTest {
 //    }
     //https://en.wikipedia.org/wiki/RSA_(cryptosystem)
     @Test
-    public void powMod_test(){
-        int intBase = 2790;
-        int intExp = 413;
-        int intModulus = 3233;
-        int intResult = 65;
+    public void powMod_test() {
+//        BigInteger b1 = BigInteger.valueOf(89358492031L);
+//        BigInteger b2 = BigInteger.valueOf(3849208424820298502L);
+//        BigInteger b3 = BigInteger.valueOf(5784390233111L);
+//        BigInteger b4 = b1.modPow(b2,b3);
+        long intBase = 89358492031L;
+        long intExp = 3849208424820298502L;
+        long intModulus = 5784390233111L;
+        long intResult = 972957354483L;
         BigUInt base = new BigUInt(intBase);
         BigUInt exp = new BigUInt(intExp);
         BigUInt modulus = new BigUInt(intModulus);
@@ -146,12 +159,13 @@ public final class BigUIntTest {
 
         Assert.assertTrue(result.equals(expectedResult));
     }
+
     @Test
-    public void divide_test(){
-        int intNom = 3008493;
-        int intDenom = 99984;
-        int intResult = intNom/intDenom;
-        int intMod = intNom%intDenom;
+    public void divide_test() {
+        long intNom = (long) Integer.MAX_VALUE * 189327123L + 7236481L;
+        long intDenom = (long) Integer.MAX_VALUE + 99984L;
+        long intResult = intNom / intDenom;
+        long intMod = intNom % intDenom;
         BigUInt nom = new BigUInt(intNom);
         BigUInt denom = new BigUInt(intDenom);
         BigUInt expectedResult = new BigUInt(intResult);
@@ -161,11 +175,15 @@ public final class BigUIntTest {
 
         Assert.assertTrue(result[0].equals(expectedResult) && result[1].equals(expectedMod));
     }
+
     @Test
-    public void modInv_test(){
-        int intVal = 17;
-        int intModulus = 780;
-        int intResult = 413;
+    public void modInv_test() {
+//        BigInteger b1 = BigInteger.valueOf(89358492031L);
+//        BigInteger b2 = BigInteger.valueOf(3849208424820298502L);
+//        BigInteger b3 = b1.modInverse(b2);
+        long intVal = 89358492031L;
+        long intModulus = 3849208424820298502L;
+        long intResult = 1156557425131638887L;
         BigUInt val = new BigUInt(intVal);
         BigUInt modulus = new BigUInt(intModulus);
         BigUInt expectedResult = new BigUInt(intResult);
@@ -174,57 +192,68 @@ public final class BigUIntTest {
 
         Assert.assertTrue(result.equals(expectedResult));
     }
+
     @Test
     public void performance_test() {
         Random random = new Random();
-        BigUInt one = BigUInt.probablePrime(3000, random);
-        BigUInt two = BigUInt.probablePrime(3000, random);
+        BigInteger oneJ = new BigInteger(3000, random);
+        BigInteger twoJ = new BigInteger(3000, random);
+//        System.out.println(oneJ.toString());
+//        System.out.println(twoJ.toString());
+        BigUInt one = new BigUInt(oneJ.toByteArray());
+        BigUInt two = new BigUInt(twoJ.toByteArray());
 
         long start = System.nanoTime();
         one.add(two);
         two.add(one);
-        System.out.printf("Add in %d milliseconds\n", System.nanoTime() - start);
+        System.out.printf("Add in %d nanoseconds\n", System.nanoTime() - start);
 
         start = System.nanoTime();
         one.multiply(two);
         two.multiply(one);
-        System.out.printf("Multiply in %d milliseconds\n\n", System.nanoTime() - start);
+        System.out.printf("Multiply in %d nanoseconds\n\n", System.nanoTime() - start);
 
-
-        BigInteger oneB = BigInteger.probablePrime(3000, random);
-        BigInteger twoB = BigInteger.probablePrime(3000, random);
 
         start = System.nanoTime();
-        oneB.add(twoB);
-        twoB.add(oneB);
-        System.out.printf("Add in %d milliseconds\n", System.nanoTime() - start);
+        oneJ.add(twoJ);
+        twoJ.add(oneJ);
+        System.out.printf("Add in %d nanoseconds\n", System.nanoTime() - start);
 
         start = System.nanoTime();
-        oneB.multiply(twoB);
-        twoB.multiply(oneB);
-        System.out.printf("Multiply in %d milliseconds\n\n", System.nanoTime() - start);
+        oneJ.multiply(twoJ);
+        twoJ.multiply(oneJ);
+        System.out.printf("Multiply in %d nanoseconds\n\n", System.nanoTime() - start);
 
     }
-//    @Test
-//    public void prime_test(){
-//        for (int k = 0; k < 30; k++) {
-//
-//
-//            Random rnd = new SecureRandom();
-//            int intVal = 17;
-//            int intModulus = 780;
-//            int intResult = 413;
-//            BigUInt val = BigUInt.probablePrime(20, rnd);
-//
-//            for (int i = 2; ; i++) {
-//                BigUInt[] res = val.divide(new BigUInt(i));
-//                if (res[0].equals(BigUInt.one()) && res[1].equals(BigUInt.zero())) {
-//                    break;
-//                }
-//                Assert.assertFalse(res[1].equals(BigUInt.zero()));
-//            }
-//        }
-//
-//    }
+
+    @Test
+    public void prime_test() {
+        for (int k = 0; k < 30; k++) {
+
+
+            Random rnd = new SecureRandom();
+            BigUInt val = BigUInt.probablePrime(20, rnd);
+
+            for (int i = 2; ; i++) {
+                BigUInt[] res = val.divide(new BigUInt(i));
+                if (res[0].equals(BigUInt.one()) && res[1].equals(BigUInt.zero())) {
+                    break;
+                }
+                Assert.assertFalse(res[1].equals(BigUInt.zero()));
+            }
+        }
+
+    }
+    @Test
+    public void bytes_test() {
+        Random rnd = new SecureRandom();
+        BigInteger bigInt = BigInteger.probablePrime(64, rnd);
+
+        byte[] initialArray = bigInt.toByteArray();
+        BigUInt bigUInt = new BigUInt(initialArray);
+        byte[] newArray = bigUInt.toByteArray();
+
+        Assert.assertArrayEquals(initialArray, newArray);
+    }
 
 }

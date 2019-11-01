@@ -14,25 +14,33 @@ import lesha3003.digitalsignature.rsa.RsaCore;
 
 public class DigitalSignatureTest {
     @Test
-    public void encrypt_test() throws IOException {
+    public void generateAndVerify_test() throws IOException {
         DigitalSignature digitalSignature = new DigitalSignature();
 
         byte[] data = new byte[1024];
+        byte[] invalidSignature = new byte[100];
         Random random = new SecureRandom();
         random.nextBytes(data);
+        random.nextBytes(invalidSignature);
+//
+//        BigInteger integer = new BigInteger(1000, random);
+//        Assert.assertEquals(integer, new BigInteger(integer.toByteArray()));
 
-        BigInteger integer = new BigInteger(1000, random);
-        Assert.assertEquals(integer, new BigInteger(integer.toByteArray()));
+        InputStream inputStream = new ByteArrayInputStream(data);
+        byte[] validSignature = digitalSignature.generateSignature(inputStream);
 
-//        InputStream inputStream = new ByteArrayInputStream(data);
-//        byte[] signature = digitalSignature.generateSignature(inputStream);
-//
-//        InputStream toVerify = new ByteArrayInputStream(data);
-//
-//        boolean verified = digitalSignature.verify(toVerify, signature);
-//
-//
-//        Assert.assertTrue(verified);
+
+        InputStream toVerify = new ByteArrayInputStream(data);
+
+        boolean verifiedValid = digitalSignature.verify(toVerify, validSignature);
+
+        toVerify = new ByteArrayInputStream(data);
+
+        boolean verifiedInvalid = digitalSignature.verify(toVerify, invalidSignature);
+
+
+        Assert.assertTrue(verifiedValid);
+        Assert.assertFalse(verifiedInvalid);
     }
 //    @Test
 //    public void decrypt_test() {

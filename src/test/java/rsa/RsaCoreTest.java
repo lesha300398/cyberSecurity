@@ -33,11 +33,12 @@ public final class RsaCoreTest {
 
     @Test
     public void integrity_test() {
-        RsaCore rsa = new RsaCore(300);
+        RsaCore rsa = new RsaCore(3000);
         System.out.println("RSA ready");
-        byte[] expectedPlain = new byte[20];
+        byte[] expectedPlain = new byte[100];
         Random random = new SecureRandom();
         random.nextBytes(expectedPlain);
+        expectedPlain[0] &= 0b0111;
         System.out.println("Plain ready");
 
 
